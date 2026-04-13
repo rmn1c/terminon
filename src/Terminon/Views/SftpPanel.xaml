@@ -1,0 +1,128 @@
+<UserControl x:Class="Terminon.Views.SftpPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:Terminon.Converters"
+             Width="380"
+             Background="{DynamicResource WindowBackgroundBrush}">
+
+    <UserControl.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
+        <conv:NullToVisibilityConverter x:Key="NullToVis"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="120"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="0" BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,0,0,1" Padding="6,4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="SFTP" FontSize="12" FontWeight="SemiBold"
+                           Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock Grid.Column="1" Text="{Binding CurrentPath}" FontSize="12"
+                           Foreground="{DynamicResource SubtextBrush}" VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis"/>
+                <Button Grid.Column="2" Content="↑" Style="{StaticResource IconButton}"
+                        Command="{Binding NavigateUpCommand}" ToolTip="Parent directory"/>
+                <Button Grid.Column="3" Content="⟳" Style="{StaticResource IconButton}"
+                        Command="{Binding RefreshCommand}" ToolTip="Refresh"/>
+                <Button Grid.Column="4" Content="↓" Style="{StaticResource IconButton}"
+                        Command="{Binding DownloadCommand}" ToolTip="Download selected"/>
+                <Button Grid.Column="5" Content="↑" Style="{StaticResource IconButton}"
+                        Command="{Binding UploadCommand}" ToolTip="Upload file(s)"/>
+            </Grid>
+        </Border>
+
+        <!-- File list -->
+        <ListView Grid.Row="1" ItemsSource="{Binding Entries}"
+                  SelectedItem="{Binding SelectedEntry}"
+                  Style="{DynamicResource DarkListView}"
+                  VirtualizingPanel.IsVirtualizing="True"
+                  BorderThickness="0"
+                  MouseDoubleClick="FileList_DoubleClick">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Name" Width="180">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock FontSize="12" Margin="0,0,4,0" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="📄"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding EntryType}" Value="Directory">
+                                                        <Setter Property="Text" Value="📁"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding EntryType}" Value="SymbolicLink">
+                                                        <Setter Property="Text" Value="🔗"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding Name}" FontSize="12"
+                                               Foreground="{DynamicResource TextBrush}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Size" Width="70" DisplayMemberBinding="{Binding SizeDisplay}"/>
+                    <GridViewColumn Header="Modified" Width="120"
+                                    DisplayMemberBinding="{Binding LastModified, StringFormat=\{0:yyyy-MM-dd HH:mm\}}"/>
+                </GridView>
+            </ListView.View>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                    <Setter Property="FontSize" Value="12"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource Surface0Brush}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource Surface0Brush}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
+
+        <!-- Status bar -->
+        <Border Grid.Row="2" BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,1,0,0" Padding="6,3">
+            <Grid>
+                <TextBlock Text="{Binding StatusMessage}" FontSize="11"
+                           Foreground="{DynamicResource SubtextBrush}"/>
+                <ProgressBar IsIndeterminate="True" Height="2" VerticalAlignment="Bottom"
+                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
+                             Style="{DynamicResource DarkProgressBar}"/>
+            </Grid>
+        </Border>
+
+        <!-- Transfer queue -->
+        <Expander Grid.Row="3" Header="Transfers" IsExpanded="True"
+                  Foreground="{DynamicResource TextBrush}"
+                  Background="{DynamicResource SidebarBackgroundBrush}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="100">
+                <ItemsControl ItemsSource="{Binding Transfers}"
+                              ItemTemplate="{DynamicResource TransferItemTemplate}"
+                              Margin="6"/>
+            </ScrollViewer>
+        </Expander>
+    </Grid>
+</UserControl>
