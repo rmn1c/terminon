@@ -185,7 +185,9 @@ public class TerminalControl : FrameworkElement
         else
         {
             var ft = new FormattedText("W", System.Globalization.CultureInfo.InvariantCulture,
-                FlowDirection.LeftToRight, new Typeface(FontFamily), FontSize, Brushes.White, pixelsPerDip);
+                System.Windows.FlowDirection.LeftToRight,
+                new Typeface(FontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
+                FontSize, Brushes.White, pixelsPerDip);
             _charWidth = ft.Width;
             _charHeight = ft.Height;
             _charBaseline = ft.Baseline;
@@ -285,9 +287,9 @@ public class TerminalControl : FrameworkElement
                 sb.Append(line[c].Character == '\0' ? ' ' : line[c].Character);
             var ft = new FormattedText(sb.ToString(),
                 System.Globalization.CultureInfo.InvariantCulture,
-                FlowDirection.LeftToRight,
-                new Typeface(FontFamily), FontSize,
-                GetBrush(scheme.DefaultForeground), pixelsPerDip);
+                System.Windows.FlowDirection.LeftToRight,
+                new Typeface(FontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
+                FontSize, GetBrush(scheme.DefaultForeground), pixelsPerDip);
             for (int c = 0; c < cols; c++)
             {
                 var cell = line[c];
